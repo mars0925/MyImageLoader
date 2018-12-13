@@ -45,11 +45,11 @@ public class ImageLoader {
     private static final int TAG_KEY_URI = R.id.imageloader_uri;
 
     /*線程池參數*/
-    private static final int CPU_COUNT = Runtime.getRuntime()
-            .availableProcessors();
-    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
-    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
-    private static final long KEEP_ALIVE = 10L;
+    /*線程池參數*/
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();//CPU的的數量
+    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;//線程池初始化線程數，是CPU數量加1
+    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;///這是執行緒池維護的最大的執行緒數，CPU的兩倍加1
+    private static final long KEEP_ALIVE = 10;//當執行緒數超過初始化的執行緒數時，多出來的空閒執行緒，存活的時間
 
 
     public ImageLoader(Context context) {
@@ -361,6 +361,7 @@ public class ImageLoader {
             imageView.setImageBitmap(bitmap);
             return;
         }
+
         Runnable loadBitmapTask = new Runnable() {
             @Override
             public void run() {
@@ -376,6 +377,7 @@ public class ImageLoader {
         THREAD_POOL_EXECUTOR.execute(loadBitmapTask);//執行異步加載內Runnable()的內容
     }
 
+    //用於構造執行緒池
     private static final ThreadFactory sThreadFactory = new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger();
 
@@ -401,7 +403,7 @@ public class ImageLoader {
         }
     };
 
-    /*建立線程池*/
+    /*建立線程池 用來執行任務的執行緒池，任務最終會交給它來處理*/
     private static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
             CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS,
             new LinkedBlockingDeque<Runnable>(), sThreadFactory);
