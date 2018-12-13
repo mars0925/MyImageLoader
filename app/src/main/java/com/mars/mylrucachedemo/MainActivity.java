@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     /*網路圖片資料來源*/
     private void initData() {
         dataList = new ArrayList<>();
-        for (int i = 0; i < 50000; i++) {
+        for (int i = 0; i < 500; i++) {
             dataList.add("https://cdn.pixabay.com/photo/2018/12/02/21/47/pair-3852277_960_720.jpg");
         }
     }

@@ -56,7 +56,7 @@ public class ImageLoader {
         mImageResizer = new ImageResizer();//圖片縮圖類別
         Context mContext = context;
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        int cacheSize = maxMemory / 128;
+        int cacheSize = maxMemory / 8;
         /*建立緩存*/
         mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
             @Override
