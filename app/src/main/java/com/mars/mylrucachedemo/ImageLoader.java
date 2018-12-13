@@ -56,12 +56,20 @@ public class ImageLoader {
         mImageResizer = new ImageResizer();//圖片縮圖類別
         Context mContext = context;
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        int cacheSize = maxMemory / 8;
+        int cacheSize = maxMemory / 128;
         /*建立緩存*/
         mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
             @Override
             protected int sizeOf(String key, Bitmap value) {
                 return value.getRowBytes() * value.getHeight() / 1024;
+            }
+            /*當item被回收或者刪掉時調用。該方法當value被回收釋放存儲空間時被remove調用*/
+            @Override
+            protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+                super.entryRemoved(evicted, key, oldValue, newValue);
+                Log.e("entryRemoved",key + "");
+                Log.e("entryRemoved",key + "oldValue");
+                Log.e("entryRemoved",key + "newValue");
             }
         };
 
@@ -267,7 +275,7 @@ public class ImageLoader {
 
     /**
      * load bitmap from memory cache or disk cache or network.
-     * 同步加载的方法需要在子线程中调用。
+     * 同步加載的方法需要再子線程使用。
      * 首先嘗試從記憶體緩存中讀取圖片，接著嘗試從硬碟緩存中讀取圖片，最後才會從網路中下載。
      *
      * @param uri       http url
@@ -306,7 +314,6 @@ public class ImageLoader {
 
     /**
      * 從內存獲取 bitmap
-     *
      * @param url 圖片的url
      */
     private Bitmap loadBitmapFromMemCache(String url) {
@@ -398,11 +405,5 @@ public class ImageLoader {
     private static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
             CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS,
             new LinkedBlockingDeque<Runnable>(), sThreadFactory);
-
-
-
-
-
-
 
 }
