@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private void initData() {
         dataList = new ArrayList<>();
         for (int i = 0; i < 500; i++) {
-            dataList.add("https://cdn.pixabay.com/photo/2018/12/02/21/47/pair-3852277_960_720.jpg");
+            dataList.add("http://203.66.115.177/TransAPI/InfinittWado/WadoImage?url=http%3a%2f%2f192.66.29.43%3a8080%2fxwado%2fPushWADO%3frequestType%3dWADO%26contentType%3dimage%2fjpeg%26rows%3d150%26objectUID%3d1.2.840.113619.2.256.50122283986.1556690231.5");
         }
     }
 }

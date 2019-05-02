@@ -101,7 +101,7 @@ public class ImageLoader {
     }
 
     /**
-     * 内存缓存獲取
+     * 内存缓存獲取 拿key到 LruCache的物件查看看有沒有圖片
      */
     private Bitmap getBitmapFromMemoryCache(String key) {
         return mMemoryCache.get(key);
@@ -146,9 +146,11 @@ public class ImageLoader {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException("load bitmap from UI Thread,it's not recommended");
         }
+
         if (mDiskLruCache == null) {
             return null;
         }
+        
         Bitmap bitmap = null;
         String key = hashKeyFormUrl(url);
         DiskLruCache.Snapshot snapshot = mDiskLruCache.get(key);
@@ -156,6 +158,8 @@ public class ImageLoader {
             FileInputStream fileInputStream = (FileInputStream) snapshot.getInputStream(DISK_CACHE_INDEX);
             FileDescriptor fileDescriptor = fileInputStream.getFD();
             bitmap = mImageResizer.decodeSampleFromFileDescriptor(fileDescriptor, reqWidth, reqHeight);
+
+            /*把圖片資料從到內存*/
             if (bitmap != null) {
                 addBitmapToMemoryCache(key, bitmap);
             }
@@ -193,9 +197,8 @@ public class ImageLoader {
 
 
     /**
-     * 將URL換成key
-     *
-     * @param url 圖片的URL
+     * 將下載網址換成MD5的key
+     * @param url 圖片的下載網址
      */
     private String hashKeyFormUrl(String url) {
         String cacheKey;
@@ -213,7 +216,6 @@ public class ImageLoader {
 
     /**
      * 將Url的位元組陣列轉換成hash字串
-     *
      * @param bytes URL的字节数组
      */
     private String bytesToHexString(byte[] bytes) {
@@ -271,13 +273,10 @@ public class ImageLoader {
         return false;
     }
 
-    //同步加载
-
     /**
      * load bitmap from memory cache or disk cache or network.
      * 同步加載的方法需要再子線程使用。
      * 首先嘗試從記憶體緩存中讀取圖片，接著嘗試從硬碟緩存中讀取圖片，最後才會從網路中下載。
-     *
      * @param uri       http url
      * @param reqWidth  the width ImageView desired
      * @param reqHeight the height ImageView desired
@@ -293,6 +292,7 @@ public class ImageLoader {
 
         try {
             bitmap = loadBitmapFromDiskCache(uri, reqWidth, reqHeight); //從硬碟緩存獲取圖片
+
             if (bitmap != null) {
                 Log.e(TAG, "loadBitmapFromDiskCache,url " + uri);
                 return bitmap;
@@ -314,7 +314,7 @@ public class ImageLoader {
 
     /**
      * 從內存獲取 bitmap
-     * @param url 圖片的url
+     * @param url 圖片的下載網址
      */
     private Bitmap loadBitmapFromMemCache(String url) {
         String key = hashKeyFormUrl(url);
@@ -353,10 +353,19 @@ public class ImageLoader {
         return bitmap;
     }
 
-    /*異步加載*/
+    /**
+     * 非同步加載步圖片
+     * @param uri 下載網址
+     * @param imageView 要顯示的imageview 元件
+     * @param reqWidth 元件寬度
+     * @param reqHeight 元件高度
+     */
     public void bindBitmap(final String uri, final ImageView imageView, final int reqWidth, final int reqHeight) {
-        imageView.setTag(TAG_KEY_URI, uri);
+        imageView.setTag(TAG_KEY_URI, uri);//設定標籤
+
         Bitmap bitmap = loadBitmapFromMemCache(uri);
+
+        /*如果內存有資料的話,將圖片設定到imageview*/
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
             return;
@@ -366,6 +375,7 @@ public class ImageLoader {
             @Override
             public void run() {
                 Bitmap bitmap = loadBitmap(uri, reqWidth, reqHeight);
+
                 if (bitmap != null) {
                     LoaderResult result = new LoaderResult(imageView, uri, bitmap);
                     Message message = mMainHandler.obtainMessage(MESSAGE_POST_RESULT,result);

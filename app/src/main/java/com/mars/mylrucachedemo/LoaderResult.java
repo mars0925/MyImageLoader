@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 /**
- * Created by zqy on 17/12/11.
+ * Created by mars0925 on 2019/04/30.
  */
 
 public class LoaderResult {
